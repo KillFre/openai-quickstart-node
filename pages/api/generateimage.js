@@ -15,24 +15,27 @@ export default async function (req, res) {
     return;
   }
 
-  const animal = req.body.animal || '';
-  if (animal.trim().length === 0) {
+  const imgPrompt = req.body.img || '';
+  if (imgPrompt.trim().length === 0) {
     res.status(400).json({
       error: {
-        message: "Please enter a valid animal",
+        message: "Please enter a valid prompt",
       }
     });
     return;
   }
 
   try {
-    const completion = await openai.createCompletion({
-      model: "text-davinci-003",
-      prompt: generatePrompt(animal),
-      temperature: 0.6,
-    });
-    res.status(200).json({ result: completion.data.choices[0].text });
-  } catch(error) {
+    const aiImg = await openai.createImage({
+      prompt: imgPrompt,
+      n: 1,
+      size: "1024x1024"
+    }
+    );
+
+
+    res.status(200).json({ result: aiImg.data.data[0].url });
+  } catch (error) {
     // Consider adjusting the error handling logic for your use case
     if (error.response) {
       console.error(error.response.status, error.response.data);
@@ -48,11 +51,6 @@ export default async function (req, res) {
   }
 }
 
-function generatePrompt(animal) {
-  const capitalizedAnimal =
-    animal[0].toUpperCase() + animal.slice(1).toLowerCase();
-  return `動物の名前を日本語でスーパーヒーローみたいなものを3通り提案して欲しい。
-
-Animal: ${capitalizedAnimal}
-Names:`;
+function generatePrompt(prompt) {
+  return prompt;
 }
